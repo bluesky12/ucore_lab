@@ -293,7 +293,7 @@ read_eip(void) {
  * */
 void
 print_stackframe(void) {
-     /* LAB1 YOUR CODE : STEP 1 */
+     /* LAB1 2012011274 : STEP 1 */
      /* (1) call read_ebp() to get the value of ebp. the type is (uint32_t);
       * (2) call read_eip() to get the value of eip. the type is (uint32_t);
       * (3) from 0 .. STACKFRAME_DEPTH
@@ -305,5 +305,26 @@ print_stackframe(void) {
       *           NOTICE: the calling funciton's return addr eip  = ss:[ebp+4]
       *                   the calling funciton's ebp = ss:[ebp]
       */
+
+	uint32_t ebp= read_ebp(), eip= read_eip();
+
+	int i=0;
+	while (ebp!=0 && (i++)<STACKFRAME_DEPTH )
+	{
+		uint32_t args[4]={0};
+		asm volatile ("movl 8(%1), %0" : "=r" (args[0])  : "r"(ebp));
+		asm volatile ("movl 12(%1), %0" : "=r" (args[1])  : "r"(ebp));
+		asm volatile ("movl 16(%1), %0" : "=r" (args[2])  : "r"(ebp));
+		asm volatile ("movl 20(%1), %0" : "=r" (args[3])  : "r"(ebp));
+
+		cprintf("ebp:0x%08x", ebp);
+		cprintf(" eip:0x%08x", eip);
+		cprintf(" args:0x%08x 0x%08x 0x%08x 0x%08x", args[0], args[1], args[2], args[3]);
+		cprintf("\n");
+		print_debuginfo(eip-1);
+
+		asm volatile ("movl 4(%1), %0" : "=r" (eip) : "r"(ebp));
+		asm volatile ("movl 0(%1), %0" : "=r" (ebp) : "r"(ebp));
+	}
 }
 
